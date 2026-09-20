@@ -1,0 +1,5 @@
+import {readFile,readdir,stat} from 'node:fs/promises';
+import path from 'node:path';
+const root=path.resolve('dist');let pages=0,links=0;
+async function walk(dir){for(const f of await readdir(dir,{withFileTypes:true})){const p=path.join(dir,f.name);if(f.isDirectory())await walk(p);else if(p.endsWith('.html')){pages++;const s=await readFile(p,'utf8');if(!s.includes('<html lang="es">')||!s.includes('name="description"')||!s.includes('<h1>'))throw Error('Metadatos o título ausentes: '+p);for(const m of s.matchAll(/(?:href|src)="(\/[^"#]*)"/g)){const url=m[1];const dest=path.join(root,url.endsWith('/')?url+'index.html':url);await stat(dest).catch(()=>{throw Error('Enlace roto: '+p+' → '+url)});links++;}for(const m of s.matchAll(/href="#([^" ]+)"/g)){if(!s.includes(`id="${m[1]}"`))throw Error('Ancla rota: '+m[1]);}for(const m of s.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/g))JSON.parse(m[1]);if(/ca-pub-|adsbygoogle|googletagmanager/.test(s))throw Error('Rastreador activo inesperado');}}}
+await walk(root);console.log(`OK: ${pages} páginas, ${links} enlaces y recursos locales, anclas y JSON-LD. Sin rastreadores publicitarios.`);

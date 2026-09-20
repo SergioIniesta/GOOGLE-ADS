@@ -1,0 +1,43 @@
+import {readFile,writeFile,mkdir,copyFile} from 'node:fs/promises';
+import {articles} from '../content/articles.mjs';
+import config from '../site.config.mjs';
+const origin=(process.env.SITE_URL||config.origin).replace(/\/$/,'');
+const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;');
+await mkdir('dist/assets',{recursive:true});
+await copyFile('src/assets/usb-c.webp','dist/assets/usb-c.webp');
+await copyFile('src/assets/CREDITS.md','dist/assets/CREDITS.txt');
+const credit=`<figcaption>Foto: <a href="https://commons.wikimedia.org/wiki/File:USB_Type-C_Charging_Cable_for_Apple_MacBook_Pro_(45718811934).jpg">Tony Webster / Wikimedia Commons</a> · <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a> · Adaptada a WebP</figcaption>`;
+const photo=`<figure class="hero-photo"><img src="/assets/usb-c.webp" alt="Primer plano del conector de un cable USB-C para MacBook Pro" width="1400" height="921" fetchpriority="high">${credit}</figure>`;
+let home=await readFile('dist/index.html','utf8');
+home=home.replace(/<div class="hero-visual">[\s\S]*?<\/div><\/div><\/section>/,`${photo}</section>`);
+await writeFile('dist/index.html',home);
+for(const a of articles){
+ const file=`dist/articulo/${a.slug}/index.html`;
+ let html=await readFile(file,'utf8');
+ const schema={'@context':'https://schema.org','@type':'Article',headline:a.title,description:a.summary,datePublished:'2026-09-20',dateModified:'2026-09-20',inLanguage:'es',author:{'@type':'Organization',name:'Prisma Diario',url:origin+'/sobre-nosotros/'},publisher:{'@type':'Organization',name:'Prisma Diario'},mainEntityOfPage:origin+'/articulo/'+a.slug+'/'};
+ html=html.replace('</head>',`<script type="application/ld+json">${JSON.stringify(schema).replaceAll('<','\\u003c')}</script></head>`).replace('content="website"','content="article"');
+ html=html.replace('<div class="article-body">',`${a.lead?photo:''}<div class="article-body"><div class="article-index"><strong>En esta guía</strong><ol>${a.sections.map(([h],i)=>`<li><a href="#paso-${i+1}">${esc(h)}</a></li>`).join('')}</ol></div>`);
+ a.sections.forEach(([h],i)=>{html=html.replace(`<h2>${h}</h2>`,`<h2 id="paso-${i+1}">${h}</h2>`);});
+ if(!a.sources.length)html=html.replace(/<aside class="sources">[\s\S]*?<\/aside>/,'<aside class="sources"><h2>Sobre este método</h2><p>Elaboración de Prisma Diario. Los importes son ejemplos aritméticos hipotéticos; no son precios de servicios ni compromisos de ahorro.</p></aside>');
+ html=html.replace('</article><section',`<p class="correction"><a href="/contacto/">¿Has encontrado un error? Consulta cómo comunicarlo.</a></p></article><section`);
+ await writeFile(file,html);
+}
+const contact=config.email?`<p>Escribe a <a href="mailto:${esc(config.email)}">${esc(config.email)}</a> para consultas o correcciones. Indica el título del artículo, el dato que quieres revisar y, si puedes, una fuente.</p>`:'<p>El canal público de correo está pendiente de configuración. Esta edición todavía no acepta mensajes ni recoge datos mediante formularios.</p>';
+let about=await readFile('dist/sobre-nosotros/index.html','utf8');
+about=about.replace('El canal público de correcciones se habilitará cuando se complete la identificación del titular.',`El proyecto está promovido por ${esc(config.owner)}. ${config.email?'Puedes solicitar una corrección desde la página de contacto.':'El canal público de correcciones está pendiente de configuración.'}`);
+await writeFile('dist/sobre-nosotros/index.html',about);
+let legal=await readFile('dist/aviso-legal/index.html','utf8');
+legal=legal.replace('La identificación completa del titular y el correo de contacto público están pendientes de incorporación.',`Titular del proyecto: ${esc(config.owner)}. ${config.email?'Contacto: '+esc(config.email)+'.':'Correo público pendiente de configuración.'} Los datos legales adicionales que correspondan a la actividad están pendientes de completar.`);
+await writeFile('dist/aviso-legal/index.html',legal);
+const contactPage=about.replace(/<title>.*?<\/title>/,'<title>Contacto | Prisma Diario</title>').replaceAll(origin+'/sobre-nosotros/',origin+'/contacto/').replace(/<main id="contenido">[\s\S]*?<\/main>/,`<main id="contenido"><article class="article legal"><div class="eyebrow">PRISMA DIARIO</div><h1>Contacto y correcciones</h1><div class="article-body"><p>Responsable del proyecto: ${esc(config.owner)}.</p>${contact}<h2>Qué hacemos con una corrección</h2><p>Contrastamos el dato con la fuente y, cuando procede, actualizamos el artículo indicando el cambio. Si se trata de condiciones de un servicio, la información oficial del proveedor es la referencia para comprobar su vigencia.</p></div></article></main>`);
+await mkdir('dist/contacto',{recursive:true});await writeFile('dist/contacto/index.html',contactPage.replaceAll('Nuestro criterio','Contacto y correcciones'));
+const notFound=home.replace(/<title>.*?<\/title>/,'<title>Página no encontrada | Prisma Diario</title>').replace(/<link rel="canonical"[^>]+>/,'').replace('</head>','<meta name="robots" content="noindex"></head>').replace(/<main id="contenido">[\s\S]*?<\/main>/,'<main id="contenido"><article class="article legal"><div class="eyebrow">ERROR 404</div><h1>Esta página no está aquí.</h1><p>Puede que el enlace haya cambiado. <a class="read" href="/">Volver a la portada ↗</a></p></article></main>');
+await writeFile('dist/404.html',notFound);
+const routes=['/','/sobre-nosotros/','/contacto/','/privacidad/','/aviso-legal/',...['tecnologia','consumo','seguridad','ahorro'].map(x=>`/tema/${x}/`),...articles.map(a=>`/articulo/${a.slug}/`)];
+await writeFile('dist/sitemap.xml',`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${routes.map(p=>`<url><loc>${esc(origin+p)}</loc><lastmod>2026-09-20</lastmod></url>`).join('')}</urlset>`);
+await writeFile('dist/robots.txt',`User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`);
+await writeFile('dist/feed.xml',`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>Prisma Diario</title><link>${esc(origin)}</link><description>Actualidad útil para tu vida digital.</description><language>es</language>${articles.map(a=>`<item><title>${esc(a.title)}</title><link>${origin}/articulo/${a.slug}/</link><guid>${origin}/articulo/${a.slug}/</guid><description>${esc(a.summary)}</description><pubDate>Sun, 20 Sep 2026 10:00:00 +0200</pubDate></item>`).join('')}</channel></rss>`);
+await writeFile('dist/_headers','/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: SAMEORIGIN\n');
+if(config.adsEnabled)throw new Error('Los anuncios requieren integración de CMP certificada y validación de AdSense antes de habilitarse.');
+if(config.adsensePublisher){if(!/^pub-\d{16}$/.test(config.adsensePublisher))throw new Error('ID AdSense inválido');await writeFile('dist/ads.txt',`google.com, ${config.adsensePublisher}, DIRECT, f08c47fec0942fa0\n`);}
+console.log('Imagen, metadatos, RSS, sitemap, contacto y 404 preparados. Publicidad desactivada.');
