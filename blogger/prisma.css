@@ -10,3 +10,4 @@ body{color:#172820;background:#fff;font-family:Arial,Helvetica,sans-serif}
 .post-body img{max-width:100%;height:auto}
 a:focus-visible{outline:3px solid #729828;outline-offset:4px}
 @media(max-width:600px){.post-body{font-size:17px}.post-body h2{font-size:25px}.prisma-summary{font-size:19px}}
+.bg-photo{background:#164e42!important}.bg-photo-overlay{background:transparent!important}.blog-name h1,.blog-name h1 a{color:#fff9e9}.post-body figure{margin:0 0 24px}.post-body figcaption{font-size:13px;color:#526057}

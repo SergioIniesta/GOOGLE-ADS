@@ -1,30 +1,25 @@
-# Migración a Blogger — preparación
+# Prisma Diario en Blogger
 
-Estado: archivos preparados; todavía no se ha creado ni importado el blog. La sesión de Google requiere intervención del titular. No sustituir ni retirar la web anterior hasta comprobar la migración real.
+Web pública: https://prismadiario365.blogspot.com/
+Blog: 6293533276322462269. Migración publicada y comprobada el 21 de septiembre de 2026.
 
-## Contenido
+## Realizado
 
-`prisma-diario-import.xml` contiene seis entradas y cuatro páginas en formato Atom XML, con estado borrador y categorías. El XML está generado localmente, no es una copia de seguridad exportada por Google. Su aceptación debe comprobarse con la importación real antes de dar la migración por terminada. Si Blogger no lo admite, utilizar los diez archivos de `html/` en el modo HTML de su editor. No volver a importar sin comprobar primero posibles duplicados.
+- Seis artículos publicados, visibles en portada.
+- Cuatro páginas publicadas y enlazadas en el menú: presentación, contacto, privacidad e información del titular.
+- Tema Contempo Light con `prisma.css`, cabecera verde y fondo fotográfico del tema retirado.
+- Portada comprobada en escritorio y a 390 px; artículo USB-C completo y contacto comprobados.
+- Foto USB-C servida por Wikimedia Commons, con crédito Tony Webster y licencia CC BY-SA 2.0. La imagen carga; no se subió a Blogger ni depende de Sites.
+- Blogger reconoce la cuenta AdSense existente, pero muestra el botón Conectar AdSense. También muestra un aviso de revisión: no se ha confirmado una aprobación ni se ha pulsado conectar.
 
-El generador es `node scripts/export-blogger.mjs`. No modifica `dist/` ni publica en Sites.
+## Archivos
 
-## Flujo pendiente
+`prisma-diario-import.xml` y `html/` son materiales de migración generados por `node scripts/export-blogger.mjs`, no una copia de seguridad del estado publicado. La foto añadida en el editor no forma parte del XML. No reimportar sobre este blog: podría crear duplicados.
 
-1. Iniciar sesión en Blogger con la cuenta de AdSense. Crear Prisma Diario y elegir una dirección blogspot.com que esté disponible. No hay una dirección reservada todavía.
-2. En Configuración > Gestionar blog > Importar contenido, seleccionar el XML. Mantener desactivada la publicación automática durante la revisión.
-3. Comprobar seis entradas y cuatro páginas, caracteres españoles, párrafos, etiquetas, fuentes y enlaces de correo. Publicar tras la comprobación. Configurar los enlaces permanentes antes de publicar, si Blogger permite editarlos.
-4. Aplicar Contempo y añadir `prisma.css` mediante el personalizador. Comprobar portada y artículo en móvil y escritorio. No se ha validado todavía el CSS en el tema real.
-5. En Diseño, añadir el gadget Páginas para Sobre Prisma, Contacto, Privacidad e Información del titular, y Etiquetas para las categorías. Conservar el aviso de cookies de Blogger.
-6. Subir desde Blogger la fotografía de `src/assets/usb-c.webp` al artículo sobre USB-C, con el crédito y licencia de `src/assets/CREDITS.md`. No depender de la antigua web para alojar imágenes. La exportación de texto no incorpora imágenes externas.
-7. Revisar Ingresos en Blogger y conectar la cuenta AdSense existente cuando lo permita. No crear una segunda cuenta AdSense. La disponibilidad depende de la elegibilidad que muestre Google.
-8. Completar información legal y consentimiento antes de activar anuncios. Una dirección blogspot.com no garantiza la aprobación ni ingresos.
-9. Una vez conocida y verificada la URL de Blogger, decidir la transición de la web anterior para evitar mantener dos publicaciones idénticas indexables.
+La primera importación con identificadores URN conservó solo una entrada y una página. `importar-restantes.xml` permitió importar los ocho elementos restantes mediante identificadores numéricos Blogger. El exportador ya genera ese formato. Sus IDs locales no son los IDs finales asignados por Blogger.
 
-## Fuentes oficiales
+## Pendiente antes de monetizar
 
-- https://support.google.com/blogger/answer/41387?hl=es
-- https://support.google.com/blogger/answer/1227173?hl=es
-- https://support.google.com/blogger/answer/176245?hl=es
-- https://support.google.com/blogger/answer/1269077?hl=es
+Completar los datos legales y la información sobre tratamiento efectivo; configurar el consentimiento que corresponda antes de anuncios. Conectar la cuenta existente desde Blogger > Ingresos y comprobar el resultado en AdSense. No crear una segunda cuenta. La aprobación y los ingresos dependen de Google y del tráfico; no se garantizan 50 euros mensuales.
 
-Frecuencia editorial acordada: dos artículos nuevos y una actualización por semana. No hay automatización programada ni anuncios activados.
+La versión anterior en Sites no ha sido retirada. Falta decidir su transición para evitar mantener contenido duplicado indexable. Frecuencia prevista: dos artículos y una actualización por semana; no hay automatización programada. No hemos activado anuncios ni añadido Analytics.

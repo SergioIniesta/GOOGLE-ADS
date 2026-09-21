@@ -3,13 +3,15 @@ import {createHash} from 'node:crypto';
 import {articles} from '../content/articles.mjs';
 import config from '../site.config.mjs';
 const out='blogger';
+const blogId='6293533276322462269';
 const esc=s=>String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&apos;');
 const date='2026-09-20T10:00:00+02:00';
 const entries=[];
 await mkdir(`${out}/html`,{recursive:true});
 function entry(slug,title,html,kind,labels=[]){
- const uid=createHash('sha256').update('prisma-diario-migration:'+kind+':'+slug).digest('hex');
- entries.push(`<entry><id>urn:prisma-diario:${uid}</id><published>${date}</published><updated>${date}</updated><category scheme="http://schemas.google.com/g/2005#kind" term="http://schemas.google.com/blogger/2008/kind#${kind}"/>${labels.map(l=>`<category scheme="http://www.blogger.com/atom/ns#" term="${esc(l)}"/>`).join('')}<title type="text">${esc(title)}</title><content type="html">${esc(html)}</content><author><name>Prisma Diario</name></author><app:control><app:draft>yes</app:draft></app:control></entry>`);
+ const uid=createHash('sha256').update('prisma-diario-migration:'+kind+':'+slug).digest('hex').slice(0,15);
+ const numericId=BigInt('0x'+uid).toString();
+ entries.push(`<entry><id>tag:blogger.com,1999:blog-${blogId}.post-${numericId}</id><published>${date}</published><updated>${date}</updated><category scheme="http://schemas.google.com/g/2005#kind" term="http://schemas.google.com/blogger/2008/kind#${kind}"/>${labels.map(l=>`<category scheme="http://www.blogger.com/atom/ns#" term="${esc(l)}"/>`).join('')}<title type="text">${esc(title)}</title><content type="html">${esc(html)}</content><author><name>Prisma Diario</name></author><app:control><app:draft>yes</app:draft></app:control></entry>`);
  return writeFile(`${out}/html/${slug}.html`,html);
 }
 for(const a of articles){
@@ -23,5 +25,6 @@ const pages=[
  ['aviso-legal','Información del titular',`<p>Titular: ${esc(config.owner)}.</p><p>Contacto: <a href="mailto:${esc(config.email)}">${esc(config.email)}</a>.</p><p>Proyecto editorial informativo. Los datos legales adicionales que correspondan a la actividad están pendientes de completar; esta página no constituye todavía un aviso legal completo para una actividad comercial.</p><p>Las guías no sustituyen la documentación oficial de los productos y servicios. No existe una garantía de ahorro ni de resultados individuales.</p>`]
 ];
 for(const [slug,title,html] of pages)await entry(slug,title,html,'page');
-await writeFile(`${out}/prisma-diario-import.xml`,`<?xml version="1.0" encoding="UTF-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom" xmlns:app="http://purl.org/atom/app#"><id>urn:prisma-diario:migration:2026-09</id><updated>${date}</updated><title type="text">Prisma Diario</title><generator version="1.0">Prisma Diario migration exporter</generator>${entries.join('\n')}</feed>`);
-console.log(`Exportados ${articles.length} artículos y ${pages.length} páginas como borradores. Importación real pendiente de validar en Blogger.`);
+await writeFile(`${out}/prisma-diario-import.xml`,`<?xml version="1.0" encoding="UTF-8"?>\n<feed xmlns="http://www.w3.org/2005/Atom" xmlns:app="http://purl.org/atom/app#"><id>tag:blogger.com,1999:blog-${blogId}</id><updated>${date}</updated><title type="text">Prisma Diario</title><generator version="1.0">Prisma Diario migration exporter</generator>${entries.join('\n')}</feed>`);
+console.log(`Exportados ${articles.length} artículos y ${pages.length} páginas como borradores. No reimportar sobre el blog publicado: puede crear duplicados.`);
+
