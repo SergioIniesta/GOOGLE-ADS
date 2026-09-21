@@ -1,0 +1,12 @@
+/* Aplicar sobre el tema Contempo mediante Tema > Personalizar > Avanzado > Añadir CSS.
+   Ajuste inicial; comprobar en el blog real antes de publicar. */
+body{color:#172820;background:#fff;font-family:Arial,Helvetica,sans-serif}
+.post-title,.post-title a,.blog-name h1,.blog-name h1 a{font-family:Georgia,'Times New Roman',serif;color:#164e42}
+.post-title{line-height:1.15;letter-spacing:-.6px}
+.post-body{font-size:18px;line-height:1.8;color:#25382e}
+.post-body h2{font-family:Georgia,'Times New Roman',serif;font-weight:normal;font-size:29px;line-height:1.2;margin-top:34px}
+.post-body a{color:#164e42;text-decoration:underline;text-underline-offset:3px}
+.prisma-summary{font-size:21px;line-height:1.6;color:#526057}
+.post-body img{max-width:100%;height:auto}
+a:focus-visible{outline:3px solid #729828;outline-offset:4px}
+@media(max-width:600px){.post-body{font-size:17px}.post-body h2{font-size:25px}.prisma-summary{font-size:19px}}
